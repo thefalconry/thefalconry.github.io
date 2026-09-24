@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Talon — a multi-platform agentic AI harness. Four frontends, five backends, plugin-based, long-term memory, self-hosted.">
+<meta property="og:title" content="Talon">
+<meta property="og:description" content="A multi-platform agentic AI harness. Self-hosted, plugin-based, with long-term memory.">
+<meta property="og:type" content="website">
+<title>Talon</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='27' y='27' width='46' height='46' rx='8' fill='%23ff6b35' transform='rotate(45 50 50)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface-2: #161616;
+    --border: #1c1c1c;
+    --border-2: #2a2a2a;
+    --text: #f5f5f5;
+    --text-dim: #999999;
+    --text-mute: #555555;
+    --accent: #ff6b35;
+    --accent-dim: rgba(255, 107, 53, 0.55);
+    --green: #5fb88a;
+    --nav-h: 64px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+    overflow-x: hidden;
+    animation: page-in 600ms ease-out both;
+  }
+
+  @keyframes page-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+
+  .container {
+    width: min(100% - 3rem, 1080px);
+    margin: 0 auto;
+  }
+  @media (max-width: 560px) {
+    .container { width: min(100% - 2rem, 1080px); }
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ===== Nav ===== */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(10, 10, 10, 0.6);
+    border-bottom: 1px solid transparent;
+    transition: border-color 300ms ease;
+  }
+  nav.scrolled { border-bottom-color: var(--border); }
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 0;
+    min-height: var(--nav-h);
+  }
+  .nav-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text);
+    letter-spacing: 0;
+  }
+  .nav-logo .mark {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 1px;
+    transform: rotate(45deg);
+    transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .nav-logo:hover .mark { transform: rotate(225deg); }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.88rem;
+  }
+  .nav-right a {
+    color: var(--text-dim);
+    transition: color 200ms ease;
+  }
+  .nav-right a:hover { color: var(--text); }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .nav-links { display: flex; gap: 1.5rem; }
+  @media (max-width: 720px) {
+    .nav-inner { padding: 0.85rem 0; }
+    .nav-links { display: none; }
+    .nav-right { gap: 0.9rem; font-size: 0.82rem; }
+  }
+
+  /* ===== Hamburger (mobile) ===== */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: 1px solid var(--border-2);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 200ms ease;
+  }
+  .hamburger:hover { border-color: var(--text-dim); }
+  .hamburger span {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    background: var(--text-dim);
+    border-radius: 2px;
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease, background 200ms ease;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); background: var(--text); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--text); }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem;
+    z-index: 99;
+    flex-direction: column;
+    gap: 0;
+    transform: translateY(-8px);
+    opacity: 0;
+    transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
+    pointer-events: none;
+  }
+  .mobile-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .mobile-menu a {
+    display: block;
+    padding: 0.85rem 0;
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    transition: color 200ms ease, padding-left 200ms ease;
+  }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--text); padding-left: 0.5rem; }
+
+  @media (max-width: 720px) {
+    .hamburger { display: flex; }
+    .mobile-menu { display: flex; }
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    min-height: min(820px, 86vh);
+    display: flex;
+    align-items: center;
+    padding: calc(var(--nav-h) + 4.5rem) 0 4.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  /* grid texture */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 54px 54px;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+    gap: 4rem;
+    align-items: center;
+  }
+  @media (max-width: 1040px) {
+    .hero-grid { gap: 2.75rem; }
+  }
+  @media (max-width: 880px) {
+    .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+    .hero { min-height: auto; padding: calc(var(--nav-h) + 2.75rem) 0 3.5rem; }
+  }
+
+  .hero h1 {
+    font-size: 5rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+    margin-bottom: 1.75rem;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards;
+  }
+  .hero h1 .accent {
+    color: var(--accent);
+    font-style: italic;
+    font-weight: 500;
+  }
+  .hero p.lead {
+    font-size: 1.18rem;
+    color: var(--text-dim);
+    max-width: 38ch;
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 250ms forwards;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 400ms forwards;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 2.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-mute);
+    letter-spacing: 0.04em;
+    opacity: 0;
+    animation: fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 550ms forwards;
+  }
+  .hero-badges span {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    background: rgba(255,255,255,0.015);
+  }
+  @media (max-width: 560px) {
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1.15rem;
+    }
+    .hero p.lead {
+      font-size: 0.98rem;
+      max-width: none;
+      margin-bottom: 1.5rem;
+    }
+    .hero-cta { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    .hero-cta .btn { justify-content: center; min-height: 44px; }
+    .hero-badges {
+      margin-top: 1.4rem;
+      gap: 0.4rem;
+      font-size: 0.68rem;
+    }
+    .hero-badges span { padding: 0.22rem 0.55rem; }
+  }
+  .hero-badges .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text-dim);
+  }
+  .hero-badges .live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: live-pulse 2.4s ease-out infinite;
+  }
+  @keyframes live-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.5); }
+    100% { box-shadow: 0 0 0 9px rgba(255, 107, 53, 0); }
+  }
+
+  @keyframes fade-up {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid var(--border-2);
+    background: transparent;
+    color: var(--text);
+    transition: border-color 200ms ease, color 200ms ease, background 200ms ease, transform 200ms ease;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { border-color: var(--text); }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0a0a;
+  }
+  .btn-primary:hover {
+    background: #ff7d4d;
+    border-color: #ff7d4d;
+  }
+  .btn-star {
+    border-color: rgba(255, 107, 53, 0.5);
+    color: var(--accent);
+    background: rgba(255, 107, 53, 0.06);
+  }
+  .btn-star:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255, 107, 53, 0.1);
+  }
+  .btn-arrow {
+    display: inline-block;
+    transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+  .hero-proof {
+    margin-top: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-mute);
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 480ms forwards;
+  }
+
+  /* ===== Terminal window ===== */
+  .term-window {
+    background: #0d0d0d;
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fade-up 900ms cubic-bezier(0.16, 1, 0.3, 1) 500ms forwards;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.015);
+  }
+  .term-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #3a3a3a; }
+  .dot.y { background: #2e2e2e; }
+  .dot.g { background: #262626; }
+  .term-bar:hover .dot.r { background: #ff5f57; }
+  .term-bar:hover .dot.y { background: #febc2e; }
+  .term-bar:hover .dot.g { background: #28c840; }
+  .term-title {
+    margin-left: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-mute);
+    letter-spacing: 0.05em;
+  }
+  .term-body {
+    padding: 1.1rem 1.2rem 1.3rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.85;
+    min-height: 285px;
+  }
+  .t-line { display: block; white-space: pre-wrap; word-break: break-word; }
+  .t-line .p { color: var(--text-mute); user-select: none; }
+  .t-line.t-user .p { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-sys { color: var(--text-mute); }
+  .t-user { color: var(--text); }
+  .t-tool { color: var(--accent-dim); }
+  .t-bot { color: var(--text-dim); }
+  .t-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1.1s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (max-width: 560px) {
+    .term-window { border-radius: 8px; }
+    .term-bar { padding: 0.58rem 0.7rem; }
+    .term-bar .dot { width: 8px; height: 8px; }
+    .term-title { font-size: 0.64rem; }
+    .term-body {
+      padding: 0.85rem 0.9rem 1rem;
+      font-size: 0.68rem;
+      line-height: 1.75;
+      min-height: 230px;
+      max-height: 280px;
+      overflow: hidden;
+    }
+  }
+
+  /* ===== Section base ===== */
+  section { padding: 5rem 0; scroll-margin-top: 4.5rem; }
+  @media (max-width: 720px) {
+    section { padding: 3.75rem 0; scroll-margin-top: 4rem; }
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 14px;
+    height: 1px;
+    background: var(--text-mute);
+  }
+
+  .section-h {
+    font-size: 2.25rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.2;
+    max-width: 28ch;
+    margin-bottom: 1.25rem;
+  }
+  .section-p {
+    color: var(--text-dim);
+    max-width: 58ch;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .section-p a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(255,107,53,0.4);
+  }
+
+  /* ===== Backends ===== */
+  .backend-grid {
+    margin-top: 2.75rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+  }
+  @media (max-width: 880px) { .backend-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) {
+    .backend-grid { grid-template-columns: 1fr; margin-top: 2rem; gap: 0.65rem; }
+  }
+  .backend-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.1rem;
+    transition: border-color 250ms ease, transform 250ms ease, background 250ms ease;
+  }
+  .backend-card:hover {
+    border-color: var(--accent-dim);
+    transform: translateY(-3px);
+    background: var(--surface-2);
+  }
+  .backend-card h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    margin-bottom: 0.35rem;
+  }
+  .backend-card .bk-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.7rem;
+  }
+  .backend-card p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .backend-note {
+    margin-top: 1.75rem;
+    font-size: 0.85rem;
+    color: var(--text-mute);
+  }
+  @media (max-width: 560px) {
+    .backend-card { padding: 1rem; }
+    .backend-card p { font-size: 0.78rem; }
+    .backend-note { font-size: 0.78rem; line-height: 1.75; }
+    .backend-note code { font-size: 0.72rem; }
+  }
+  .backend-note code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+  }
+
+  /* ===== Features as rows ===== */
+  .feature-list {
+    margin-top: 3rem;
+    border-top: 1px solid var(--border);
+  }
+  .feature-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 2fr;
+    gap: 2rem;
+    align-items: baseline;
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    transition: padding-left 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feature-row::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feature-row:hover { padding-left: 1rem; }
+  .feature-row:hover::before { width: 1.5rem; }
+  .feature-row .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-mute);
+    letter-spacing: 0.05em;
+  }
+  .feature-row h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0;
+  }
+  .feature-row p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 720px) {
+    .feature-row {
+      grid-template-columns: 44px 1fr;
+      gap: 0.8rem 1rem;
+      padding: 1.25rem 0;
+    }
+    .feature-row p { grid-column: 2; margin-top: 0.4rem; }
+    .feature-row:hover { padding-left: 0; }
+    .feature-row::before { display: none; }
+  }
+  @media (max-width: 560px) {
+    .feature-list { margin-top: 2.2rem; }
+    .feature-row h3 { font-size: 0.98rem; }
+    .feature-row p { font-size: 0.84rem; }
+  }
+
+  /* ===== Plugins as chips ===== */
+  .plugin-list {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+  }
+  .plugin-list span,
+  .plugin-list a {
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    background: rgba(255,255,255,0.01);
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+  }
+  .plugin-list a:hover,
+  .plugin-list span:hover {
+    color: var(--text);
+    border-color: var(--border-2);
+    transform: translateY(-2px);
+  }
+  .plugin-list a { color: var(--accent); border-color: rgba(255,107,53,0.25); }
+  .plugin-list a:hover { color: var(--accent); border-color: var(--accent-dim); }
+  .plugin-list span.archived { color: var(--text-mute); text-decoration: line-through; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+    padding-top: 2.35rem;
+    border-top: 1px solid var(--border);
+  }
+  .stat-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; margin-top: 2.75rem; }
+  }
+
+  /* ===== GitHub star funnel ===== */
+  .star-panel {
+    margin-top: 2.75rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+    gap: 2rem;
+    align-items: stretch;
+    border: 1px solid rgba(255, 107, 53, 0.28);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.09), rgba(255, 255, 255, 0.012) 52%, rgba(95, 184, 138, 0.045));
+    padding: 1.5rem;
+  }
+  .star-copy h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+  }
+  .star-copy p {
+    color: var(--text-dim);
+    max-width: 64ch;
+  }
+  .star-actions {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+  .star-reasons {
+    display: grid;
+    gap: 0.65rem;
+    align-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  .star-reasons span {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.16);
+    padding: 0.7rem 0.85rem;
+  }
+  @media (max-width: 760px) {
+    .star-panel { grid-template-columns: 1fr; padding: 1.1rem; gap: 1.2rem; }
+  }
+
+  /* ===== Install ===== */
+  .install-block {
+    margin-top: 3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 300ms ease;
+  }
+  .install-block:hover { border-color: var(--border-2); }
+  .install-block pre {
+    padding: 1.5rem 1.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 2;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  @media (max-width: 560px) {
+    .install-block { margin-top: 2rem; }
+    .install-block pre {
+      padding: 1.05rem;
+      font-size: 0.72rem;
+      line-height: 1.9;
+    }
+    .copy-row {
+      padding: 0.65rem 0.8rem;
+      font-size: 0.7rem;
+    }
+    .copy-row button {
+      min-width: 64px;
+      min-height: 34px;
+    }
+  }
+  .install-block .prompt { color: var(--text-mute); user-select: none; }
+  .install-block .comment { color: var(--text-mute); }
+  .install-block .cmd { color: var(--text); }
+  .install-block .arg { color: var(--accent); }
+  .install-block .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: blink 1.1s steps(2) infinite;
+  }
+
+  .copy-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.015);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-mute);
+  }
+  .copy-row button {
+    background: transparent;
+    border: 1px solid var(--border-2);
+    color: var(--text-dim);
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 200ms ease;
+    font-family: inherit;
+  }
+  .copy-row button:hover { border-color: var(--text); color: var(--text); }
+  .copy-row button.copied { border-color: var(--accent); color: var(--accent); }
+
+  /* ===== Footer ===== */
+  footer {
+    padding: 4rem 0;
+    border-top: 1px solid var(--border);
+    color: var(--text-mute);
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.75rem;
+    flex-wrap: wrap;
+  }
+  .footer-links a {
+    color: var(--text-mute);
+    position: relative;
+    transition: color 200ms ease;
+  }
+  .footer-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .footer-links a:hover { color: var(--text); }
+  .footer-links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* Reveal on scroll */
+  .observe {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .observe.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .no-js .observe { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .observe { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="container nav-inner">
+    <a href="#top" class="nav-logo">
+      <span class="mark"></span>
+      <span>talon</span>
+    </a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#about">Overview</a>
+        <a href="#backends">Backends</a>
+        <a href="#plugins">Plugins</a>
+        <a href="#star">Star</a>
+        <a href="#install">Install</a>
+      </div>
+      <a href="https://github.com/thefalconry/talon" target="_blank" rel="noopener">Star on GitHub</a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="#about" class="mobile-nav-link">Overview</a>
+  <a href="#backends" class="mobile-nav-link">Backends</a>
+  <a href="#plugins" class="mobile-nav-link">Plugins</a>
+  <a href="#star" class="mobile-nav-link">Star</a>
+  <a href="#install" class="mobile-nav-link">Install</a>
+  <a href="https://github.com/thefalconry/talon" target="_blank" rel="noopener">Star on GitHub</a>
+</div>
+
+<header id="top" class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>An <span class="accent">agent</span><br>with claws.</h1>
+      <p class="lead">A self-hosted, plugin-based agent harness. Four frontends, five backends, long-term memory.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://github.com/thefalconry/talon" target="_blank" rel="noopener">Star on GitHub <span class="btn-arrow">-&gt;</span></a>
+        <a class="btn btn-star" href="#install">Install Talon</a>
+      </div>
+      <div class="hero-proof">MIT, self-hosted, multi-backend, and built to run as a real long-lived agent.</div>
+      <div class="hero-badges">
+        <span class="live">v1.19.0</span>
+        <span>claude sdk</span>
+        <span>3,300+ tests</span>
+        <span>MIT</span>
+      </div>
+    </div>
+    <div class="term-window" aria-hidden="true">
+      <div class="term-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="term-title">talon — chat</span>
+      </div>
+      <div class="term-body" id="term-body"></div>
+    </div>
+  </div>
+</header>
+
+<section id="about" class="observe">
+  <div class="container">
+    <div class="eyebrow">Overview</div>
+    <h2 class="section-h">Built for agents that actually live somewhere.</h2>
+    <p class="section-p">
+      Most harnesses are one-shot terminal wrappers. Talon runs as a long-lived process with persistent memory, hot-swappable MCP plugins, and frontends for wherever you need it &mdash; CLI, Telegram, Discord, Microsoft Teams, or your own.
+    </p>
+  </div>
+</section>
+
+<section id="backends">
+  <div class="container observe">
+    <div class="eyebrow">Backends</div>
+    <h2 class="section-h">One harness, five brains.</h2>
+    <p class="section-p">
+      Every backend implements the same capability interface &mdash; heartbeat, dream, and chat handlers don't know or care which one is running. Streaming, model fallback, and context-overflow recovery come standard.
+    </p>
+
+    <div class="backend-grid">
+      <div class="backend-card">
+        <h3>Claude SDK</h3>
+        <span class="bk-key">"claude"</span>
+        <p>In-process via the Claude Agent SDK. Hook-based turn termination.</p>
+      </div>
+      <div class="backend-card">
+        <h3>Kilo</h3>
+        <span class="bk-key">"kilo"</span>
+        <p>Local HTTP server, SSE-streamed turns. Routes to many providers.</p>
+      </div>
+      <div class="backend-card">
+        <h3>OpenCode</h3>
+        <span class="bk-key">"opencode"</span>
+        <p>Local HTTP server. Same session shape as Kilo (upstream fork).</p>
+      </div>
+      <div class="backend-card">
+        <h3>Codex</h3>
+        <span class="bk-key">"codex"</span>
+        <p>Per-turn subprocess on the Codex CLI's JSONL event stream.</p>
+      </div>
+      <div class="backend-card">
+        <h3>OpenAI Agents</h3>
+        <span class="bk-key">"openai-agents"</span>
+        <p>Responses API, or any OpenAI-compatible endpoint.</p>
+      </div>
+    </div>
+
+    <p class="backend-note">Switch with one line: <code>"backend": "claude"</code> in <code>~/.talon/config.json</code>.</p>
+  </div>
+</section>
+
+<section id="features">
+  <div class="container observe">
+    <div class="eyebrow">Capabilities</div>
+    <h2 class="section-h">Seven things that matter.</h2>
+
+    <div class="feature-list">
+      <div class="feature-row">
+        <div class="num">01</div>
+        <h3>Pluggable backends</h3>
+        <p>Claude Agent SDK, Kilo, OpenCode, Codex, OpenAI Agents &mdash; one capability interface. Streaming, model fallback, context-overflow recovery.</p>
+      </div>
+      <div class="feature-row">
+        <div class="num">02</div>
+        <h3>Plugin-based</h3>
+        <p>18+ MCP plugins. Built-ins ship in the box; drop-in path plugins follow a uniform shape. Hot-reload at runtime.</p>
+      </div>
+      <div class="feature-row">
+        <div class="num">03</div>
+        <h3>Long-term memory</h3>
+        <p>Mempalace integration. ChromaDB vector store + SQLite knowledge graph. Semantic recall across sessions.</p>
+      </div>
+      <div class="feature-row">
+        <div class="num">04</div>
+        <h3>Multi-frontend</h3>
+        <p>Same brain, different mouths. Telegram, Discord, Teams, terminal &mdash; or write your own.</p>
+      </div>
+      <div class="feature-row">
+        <div class="num">05</div>
+        <h3>Dream &amp; Heartbeat</h3>
+        <p>Background modes for memory consolidation and proactive maintenance. Reflects on its own logs while you sleep.</p>
+      </div>
+      <div class="feature-row">
+        <div class="num">06</div>
+        <h3>Self-hosted</h3>
+        <p>Your VPS, your data, your backend choice. 3,300+ tests. No vendor lock-in &mdash; swap the backend, keep the agent.</p>
+      </div>
+      <div class="feature-row">
+        <div class="num">07</div>
+        <h3>Soul Kernel</h3>
+        <p>A model-free identity substrate that persists across sessions. Collects signal taps &mdash; reactions, corrections, directives &mdash; and builds a self-organizing representation independent of any backend.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="plugins">
+  <div class="container observe">
+    <div class="eyebrow">Plugins</div>
+    <h2 class="section-h">A growing ecosystem of MCP tools.</h2>
+    <p class="section-p">
+      Internal plugins live in the talon repo. External path plugins live in the
+      <a href="https://github.com/thefalconry" target="_blank" rel="noopener">thefalconry</a>
+      org and follow a uniform shape: a <code class="mono">package.json</code> + an <code class="mono">src/index.ts</code>.
+    </p>
+
+    <div class="plugin-list">
+      <span>brave-search</span>
+      <span>mempalace</span>
+      <span>github</span>
+      <span>playwright</span>
+      <span>firecrawl</span>
+      <span>tailscale</span>
+      <span>ssh</span>
+      <span>tfi</span>
+      <span>twifork</span>
+      <span>ccusage</span>
+      <span>google-calendar</span>
+      <span>gmail</span>
+      <span>google-drive</span>
+      <span>hugging-face</span>
+      <a href="https://github.com/thefalconry/talon.plugins.ffmpeg" target="_blank" rel="noopener">ffmpeg</a>
+      <a href="https://github.com/thefalconry/talon.plugins.email" target="_blank" rel="noopener">email</a>
+      <a href="https://github.com/thefalconry/talon.plugins.polymarket" target="_blank" rel="noopener">polymarket</a>
+      <a href="https://github.com/thefalconry/talon.plugins.fli" target="_blank" rel="noopener">fli</a>
+      <a href="https://github.com/thefalconry/talon.plugins.whois" target="_blank" rel="noopener">whois</a>
+      <span>extras</span>
+    </div>
+
+    <div class="stats-row">
+      <div>
+        <div class="stat-num" data-target="22" data-suffix="+">22+</div>
+        <div class="stat-label">Plugins</div>
+      </div>
+      <div>
+        <div class="stat-num" data-target="3300" data-suffix="+">3,300+</div>
+        <div class="stat-label">Tests passing</div>
+      </div>
+      <div>
+        <div class="stat-num" data-target="5">5</div>
+        <div class="stat-label">Backends</div>
+      </div>
+      <div>
+        <div class="stat-num" data-target="4">4</div>
+        <div class="stat-label">Frontends</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="star">
+  <div class="container observe">
+    <div class="eyebrow">GitHub</div>
+    <h2 class="section-h">If Talon looks useful, star the repo.</h2>
+    <p class="section-p">
+      Stars are the easiest public signal that this project is worth trying. They help developers find Talon before they settle for another thin chat wrapper.
+    </p>
+
+    <div class="star-panel">
+      <div class="star-copy">
+        <h3>Self-hosted agents with memory, plugins, and frontends that keep running.</h3>
+        <p>
+          Talon gives you Telegram, Discord, Teams, terminal, and desktop/mobile frontends over one agent core, with MCP plugins, cron, triggers, goals, heartbeat, and dream mode.
+        </p>
+        <div class="star-actions">
+          <a class="btn btn-primary" href="https://github.com/thefalconry/talon" target="_blank" rel="noopener">Star thefalconry/talon <span class="btn-arrow">-&gt;</span></a>
+          <a class="btn" href="https://github.com/thefalconry/talon#quick-start" target="_blank" rel="noopener">Read Quick Start</a>
+        </div>
+      </div>
+      <div class="star-reasons" aria-label="Why developers star Talon">
+        <span>Five interchangeable backends</span>
+        <span>22+ MCP plugins and hot reload</span>
+        <span>Persistent goals, triggers, and memory</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="container observe">
+    <div class="eyebrow">Get started</div>
+    <h2 class="section-h">Up and running in under a minute.</h2>
+    <p class="section-p">Install, run the setup wizard, start. Bring your own backend &mdash; Claude Code login, Codex, or an API key.</p>
+
+    <div class="install-block">
+      <pre><span class="comment"># install</span>
+<span class="prompt">$</span> <span class="cmd">npm install</span> <span class="arg">-g</span> talon-agent
+
+<span class="comment"># set up</span>
+<span class="prompt">$</span> <span class="cmd">talon setup</span>
+
+<span class="comment"># run</span>
+<span class="prompt">$</span> <span class="cmd">talon start</span><span class="cursor"></span></pre>
+      <div class="copy-row">
+        <span>quick install</span>
+        <button id="copy-btn">copy</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-inner">
+    <div>talon &middot; multi-platform agent harness</div>
+    <div class="footer-links">
+      <a href="https://github.com/thefalconry/talon" target="_blank" rel="noopener">talon</a>
+      <a href="https://github.com/thefalconry" target="_blank" rel="noopener">thefalconry</a>
+      <a href="https://www.npmjs.com/package/talon-agent" target="_blank" rel="noopener">npm</a>
+      <a href="https://github.com/thefalconry" target="_blank" rel="noopener">The Falconry</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Sticky-nav border on scroll
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    if (window.scrollY > 8) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.observe').forEach(el => io.observe(el));
+  setTimeout(() => document.querySelectorAll('.observe:not(.in)').forEach(el => el.classList.add('in')), 1800);
+
+  // ===== Terminal demo =====
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const termBody = document.getElementById('term-body');
+  const script = [
+    { cls: 't-cmd',  p: '$', text: 'talon chat', type: true },
+    { cls: 't-sys',  text: '● v1.19.0 · claude · opus-4-7' },
+    { cls: 't-user', p: '>', text: 'any delays on the 46A right now?', type: true },
+    { cls: 't-tool', text: '⚡ tfi_departures · stop 807' },
+    { cls: 't-bot',  text: 'Next 46A in 4 min, on time. No disruptions reported.' },
+    { cls: 't-user', p: '>', text: 'remind the group about standup at 9', type: true },
+    { cls: 't-tool', text: '⚡ create_cron_job · 0 9 * * 1-5' },
+    { cls: 't-bot',  text: 'Done — weekday reminder set for 09:00.' }
+  ];
+
+  function lineEl(item) {
+    const el = document.createElement('span');
+    el.className = 't-line ' + item.cls;
+    if (item.p) {
+      const p = document.createElement('span');
+      p.className = 'p';
+      p.textContent = item.p + ' ';
+      el.appendChild(p);
+    }
+    const txt = document.createElement('span');
+    txt.className = 'txt';
+    el.appendChild(txt);
+    return el;
+  }
+
+  function runTerm() {
+    if (!termBody) return;
+    if (reduceMotion) {
+      script.forEach(item => {
+        const el = lineEl(item);
+        el.querySelector('.txt').textContent = item.text;
+        termBody.appendChild(el);
+      });
+      return;
+    }
+
+    let loopTimer = null;
+    const cursor = document.createElement('span');
+    cursor.className = 't-cursor';
+
+    function startLoop() {
+      termBody.innerHTML = '';
+      cursor.remove();
+      let i = 0;
+      function next() {
+        if (i >= script.length) {
+          // show idle prompt then restart after pause
+          const tail = document.createElement('span');
+          tail.className = 't-line t-user';
+          tail.innerHTML = '<span class="p">&gt; </span>';
+          tail.appendChild(cursor);
+          termBody.appendChild(tail);
+          loopTimer = setTimeout(() => {
+            cursor.remove();
+            // fade out, then restart
+            termBody.style.transition = 'opacity 400ms ease';
+            termBody.style.opacity = '0';
+            setTimeout(() => {
+              termBody.style.opacity = '';
+              termBody.style.transition = '';
+              startLoop();
+            }, 420);
+          }, 3200);
+          return;
+        }
+        const item = script[i++];
+        const el = lineEl(item);
+        const txt = el.querySelector('.txt');
+        termBody.appendChild(el);
+        if (item.type) {
+          el.appendChild(cursor);
+          let c = 0;
+          const t = setInterval(() => {
+            txt.textContent = item.text.slice(0, ++c);
+            if (c >= item.text.length) {
+              clearInterval(t);
+              cursor.remove();
+              setTimeout(next, 350);
+            }
+          }, 32);
+        } else {
+          txt.textContent = item.text;
+          setTimeout(next, item.cls === 't-tool' ? 550 : 420);
+        }
+      }
+      setTimeout(next, 800);
+    }
+
+    startLoop();
+  }
+  runTerm();
+
+  // ===== Stat count-up =====
+  function animateStat(el) {
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    if (reduceMotion || !target) return;
+    const dur = 900;
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased).toLocaleString('en-US') + (t === 1 ? suffix : '');
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  const statIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateStat(e.target);
+        statIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-num[data-target]').forEach(el => statIO.observe(el));
+
+  // ===== Hamburger menu =====
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  let menuOpen = false;
+
+  function toggleMenu(force) {
+    menuOpen = force !== undefined ? force : !menuOpen;
+    hamburger.classList.toggle('open', menuOpen);
+    mobileMenu.classList.toggle('open', menuOpen);
+    hamburger.setAttribute('aria-expanded', menuOpen);
+    mobileMenu.setAttribute('aria-hidden', !menuOpen);
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+  }
+
+  if (hamburger) {
+    hamburger.addEventListener('click', () => toggleMenu());
+  }
+
+  // Close on link click
+  document.querySelectorAll('.mobile-nav-link').forEach(a => {
+    a.addEventListener('click', () => toggleMenu(false));
+  });
+
+  // Close on outside tap
+  document.addEventListener('click', (e) => {
+    if (menuOpen && !hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+      toggleMenu(false);
+    }
+  });
+
+  // Close on resize to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 720 && menuOpen) toggleMenu(false);
+  }, { passive: true });
+
+  // Copy install command
+  const copyBtn = document.getElementById('copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('npm install -g talon-agent');
+        copyBtn.textContent = 'copied';
+        copyBtn.classList.add('copied');
+        setTimeout(() => { copyBtn.textContent = 'copy'; copyBtn.classList.remove('copied'); }, 1400);
+      } catch {}
+    });
+  }
+</script>
+
+</body>
+</html>
