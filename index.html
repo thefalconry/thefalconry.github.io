@@ -8,7 +8,7 @@
 <meta property="og:description" content="Talon, by The Falconry: a self-hosted harness for long-lived AI agents. Memory, tools, many frontends and backends, and a human at the other end of the glove.">
 <meta property="og:type" content="website">
 <title>Talon · by The Falconry</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='27' y='27' width='46' height='46' rx='8' fill='%23ff6b35' transform='rotate(45 50 50)'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23141a2e'/%3E%3Cpath d='M22 30c10-2 20 6 22 26 0 6-2 10-6 14 2-12-2-24-16-28z' fill='%23ecba5c'/%3E%3Cpath d='M40 26c11-2 22 7 24 28 0 6-2 11-6 15 2-13-2-26-18-30z' fill='%23ecba5c'/%3E%3Cpath d='M58 30c10-2 20 6 22 26 0 6-2 10-6 14 2-12-2-24-16-28z' fill='%23ecba5c'/%3E%3Cpath d='M18 78q32-14 64 0' stroke='%23c8dcff' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -933,7 +933,7 @@
 <section id="backends">
   <div class="container observe">
     <div class="eyebrow">Backends</div>
-    <h2 class="section-h">One harness, five brains.</h2>
+    <h2 class="section-h">One harness, six brains.</h2>
     <p class="section-p">
       Every backend implements the same capability interface &mdash; heartbeat, dream, and chat handlers don't know or care which one is running. Streaming, model fallback, and context-overflow recovery come standard.
     </p>
@@ -964,6 +964,11 @@
         <span class="bk-key">"openai-agents"</span>
         <p>Responses API, or any OpenAI-compatible endpoint.</p>
       </div>
+      <div class="backend-card">
+        <h3>Antigravity</h3>
+        <span class="bk-key">"agy"</span>
+        <p>Google's Gemini agent CLI, for cheap mechanical work and research sweeps.</p>
+      </div>
     </div>
 
     <p class="backend-note">Switch with one line: <code>"backend": "claude"</code> in <code>~/.talon/config.json</code>.</p>
@@ -979,7 +984,7 @@
       <div class="feature-row">
         <div class="num">01</div>
         <h3>Pluggable backends</h3>
-        <p>Claude Agent SDK, Kilo, OpenCode, Codex, OpenAI Agents &mdash; one capability interface. Streaming, model fallback, context-overflow recovery.</p>
+        <p>Claude Agent SDK, Kilo, OpenCode, Codex, OpenAI Agents, Antigravity &mdash; one capability interface. Streaming, model fallback, context-overflow recovery.</p>
       </div>
       <div class="feature-row">
         <div class="num">02</div>
@@ -994,7 +999,7 @@
       <div class="feature-row">
         <div class="num">04</div>
         <h3>Multi-frontend</h3>
-        <p>Same brain, different mouths. Telegram, Discord, Teams, terminal &mdash; or write your own.</p>
+        <p>Same brain, different mouths. Telegram, WhatsApp, Discord, Teams, terminal, and native desktop and mobile apps &mdash; or write your own.</p>
       </div>
       <div class="feature-row">
         <div class="num">05</div>
@@ -1004,12 +1009,12 @@
       <div class="feature-row">
         <div class="num">06</div>
         <h3>Self-hosted</h3>
-        <p>Your VPS, your data, your backend choice. 3,300+ tests. No vendor lock-in &mdash; swap the backend, keep the agent.</p>
+        <p>Your VPS, your data, your backend choice. 5,700+ tests. Encrypted, full-state backups you can restore or clone to a new machine. No vendor lock-in &mdash; swap the backend, keep the agent.</p>
       </div>
       <div class="feature-row">
         <div class="num">07</div>
-        <h3>Soul Kernel</h3>
-        <p>A model-free identity substrate that persists across sessions. Collects signal taps &mdash; reactions, corrections, directives &mdash; and builds a self-organizing representation independent of any backend.</p>
+        <h3>Device mesh</h3>
+        <p>Companion apps for Android, macOS, Windows and Linux, plus headless nodes for your own servers. Your agent can locate, check and act on the devices you pair with it, over a pinned, token-authenticated bridge.</p>
       </div>
     </div>
   </div>
@@ -1104,8 +1109,10 @@
     <p class="section-p">Install, run the setup wizard, start. Bring your own backend &mdash; Claude Code login, Codex, or an API key.</p>
 
     <div class="install-block">
-      <pre><span class="comment"># install</span>
+      <pre><span class="comment"># install (pick one)</span>
 <span class="prompt">$</span> <span class="cmd">npm install</span> <span class="arg">-g</span> talon-agent
+<span class="prompt">$</span> <span class="cmd">brew install</span> thefalconry/talon/talon
+<span class="prompt">$</span> <span class="cmd">docker run</span> <span class="arg">-it</span> ghcr.io/thefalconry/talon
 
 <span class="comment"># set up</span>
 <span class="prompt">$</span> <span class="cmd">talon setup</span>
